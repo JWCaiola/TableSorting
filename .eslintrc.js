@@ -11,7 +11,7 @@ module.exports = {
     'no-redeclare': 'error',
     strict: ['error','global'],
     'comma-dangle': ['error','always-multiline'],
-    indent: ['error', 2],
+    indent: ['error', 2, { "SwitchCase": 1 }],
     // 'padded-blocks': ['error','never'],
     semi: 'error',
     'spaced-comment': ['error', 'always'],
