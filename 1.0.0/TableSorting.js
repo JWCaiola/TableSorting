@@ -15,10 +15,18 @@ on('ready', () => {
     this.ID = id;
     this.Items = items;
   }
+  const GetCleanImgsrc = function (imgsrc) {
+    let parts = imgsrc.match(/(.*\/images\/.*)(thumb|med|original|max)([^\?]*)(\?[^?]+)?$/);
+    if (parts) {
+      return parts[1]+'thumb'+parts[3]+(parts[4]?parts[4]:`?${Math.round(Math.random()*9999999)}`);
+    }
+    return;
+  };
   const BuildTableObjects = () => {
     let arr_objs = [];
     _.each(arr_srcItemsByTable, function(obj) {
       let srcTableID = obj[0].get('_rollabletableid');
+      let srcAvatar = obj[0].get('avatar');
       let srcTableItems = Object.values(obj);
       let srcTable = findObjs({
         type:'rollabletable',
@@ -28,6 +36,9 @@ on('ready', () => {
         return;
       }
       let srcTableName = srcTable[0].get('name');
+      if (GetCleanImgsrc(srcAvatar) === undefined) {
+        return log(`Error processing ${srcTableName}: Cannot recreate img src`);
+      }
       if(_.has(srcTableName, re_SafetyCheck)) return;
       arr_srcTableNames.push(srcTableName);
       let tableToPush = new TableConstructor(srcTableName, srcTableID, srcTableItems);
@@ -116,7 +127,6 @@ on('ready', () => {
   let arr_srcItemsByTable = _.groupBy(arr_srcItems, function(obj) {
     return obj.get('_rollabletableid');
   });
-
   const TagTables = () => {
     ForAllTables(SetSourceTags);
   };
@@ -144,10 +154,6 @@ on('ready', () => {
     });
   };
 
-  // arr_tableObjects = TagTables();
-  // BuildNewTables(arr_tableObjects);
-
-
   const HandleInput = (msg) => {
 
     if (msg.type !== "api" || !playerIsGM(msg.playerid)) {
@@ -162,6 +168,7 @@ on('ready', () => {
         return;
       }
       switch (args[1]) {
+        // Need case to handle overriding a hault due to Marketplace Avatar
         case 'tag':
           log('tagging original tables');
           TagTables();
@@ -169,6 +176,7 @@ on('ready', () => {
         case 'create':
           log('creating new tables');
           arr_tableObjects = BuildTableObjects();
+          log(arr_tableObjects);
           BuildNewTables(arr_tableObjects);
           break;
         case 'check':
