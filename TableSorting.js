@@ -180,7 +180,7 @@ on('ready', () => {
           }
           break;
         case 'remove':
-          if(args[2] === 'sort') {
+          if(args[2] === 'sorted') {
             match = ForAllTables(CheckMatches);
             if (match || args[3] === 'force') {
               ForAllTables(RemoveSortTags);
